@@ -63,7 +63,7 @@ export const bookingApi = apiSlice.injectEndpoints({
     // Get all events
     getAllEvents: builder.query<EventsResponse, void>({
       query: () => ({
-        url: "http://localhost:2000/api/events",
+        url: "/api/events",  // ✅ Removed hardcoded URL
         method: "GET",
       }),
       providesTags: ["Events"],
@@ -88,7 +88,7 @@ export const bookingApi = apiSlice.injectEndpoints({
         }
         
         return {
-          url: `http://localhost:2000/api/bookings?${params.toString()}`,
+          url: `/api/bookings?${params.toString()}`,  // ✅ Removed hardcoded URL
           method: "GET",
         };
       },
@@ -106,7 +106,7 @@ export const bookingApi = apiSlice.injectEndpoints({
     // Create a new booking
     createBooking: builder.mutation<CreateBookingResponse, CreateBookingRequest>({
       query: (data) => ({
-        url: "http://localhost:2000/api/bookings",
+        url: "/api/bookings",  // ✅ Removed hardcoded URL
         method: "POST",
         body: data,
       }),
@@ -123,4 +123,3 @@ export const {
   useGetAllBookingsQuery,
   useCreateBookingMutation,
 } = bookingApi;
-
