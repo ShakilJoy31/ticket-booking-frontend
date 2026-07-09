@@ -292,12 +292,12 @@ export default function EventList() {
 
           {searchTerm && filteredEvents.length > 0 && (
             <div className="mt-2 text-sm text-gray-400">
-              Found {filteredEvents.length} result(s) for "{searchTerm}"
+              Found {filteredEvents.length} result(s) for &quot;{searchTerm}&quot;
             </div>
           )}
           {searchTerm && filteredEvents.length === 0 && !isLoading && (
             <div className="mt-2 text-sm text-yellow-500">
-              No results found for "{searchTerm}"
+              No results found for &quot;{searchTerm}&quot;
             </div>
           )}
         </div>
@@ -621,7 +621,7 @@ export default function EventList() {
                 <p className="text-gray-400 mb-6">
                   Are you sure you want to delete the event{" "}
                   <span className="font-semibold text-gray-200">
-                    "{selectedEvent.name}"
+                    &quot;{selectedEvent.name}&quot;
                   </span>
                   ? This action cannot be undone.
                   {selectedEvent.seatsRemaining < selectedEvent.totalSeats && (

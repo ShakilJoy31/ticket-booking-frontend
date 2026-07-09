@@ -1,36 +1,155 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Event Booking System - Server
 
-## Getting Started
+A robust, production-ready event booking system built with **Node.js (Express.js)**, **MySQL**, and **Redis**. This system handles asynchronous booking processing with Bull queue, prevents overbooking, and ensures data integrity through database transactions and row-level locking.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+- ✅ **Async Booking Processing** - Fast 202 Accepted response with background queue processing
+- ✅ **Overbooking Prevention** - Database row-level locking ensures seat count integrity
+- ✅ **Duplicate Request Handling** - Unique requestId constraints prevent duplicate bookings
+- ✅ **Real-time Status Updates** - Bookings transition from PENDING → CONFIRMED/FAILED
+- ✅ **Event Management** - CRUD operations for events with seat tracking
+- ✅ **Comprehensive Filtering** - Paginated bookings with event and status filters
+- ✅ **Data Integrity** - ACID transactions with Sequelize and MySQL
+
+
+---
+
+## 📦 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v16 or higher) - [Download](https://nodejs.org/)
+- **MySQL** (v8 or higher) - [Download](https://www.mysql.com/downloads/)
+- **Redis** (v6 or higher) - [Download for Windows](https://github.com/tporadowski/redis/releases) | [Mac/Linux](https://redis.io/download)
+- **npm** or **yarn** (comes with Node.js)
+
+---
+
+## ⚙️ Installation
+
+If you visit this drive link you will be able to see a video where I have shown how to run the backend from starting to end. Please follow the link below: 
+
+https://drive.google.com/drive/folders/1CLmq3E1QIrFq60HV5QoKPjJyvGzukx_v?usp=sharing
+
+Or let me guide you how to start the server. Please follow the steps below: 
+
+### 1. Clone the Repository first. 
+
+Open cmd and run 
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/ShakilJoy31/ticket-booking-frontend.git
+cd ticket-booking-frontend (Nevigate to your server project folder)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install or npm i
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
 
-## Learn More
+### 3. Start the project (Terminal 1)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+1. Open terminal for the project. 
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+You should see:
+```
+PS C:\Users\pc\WEB_APPLICATIONS\ticket-booking-system\ticket-booking-system-frontend> npm run dev
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> event-booking-system@0.1.0 dev
+> next dev
 
-## Deploy on Vercel
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.101:3000
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ ✓ Starting...
+ ✓ Ready in 2.5s
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+
+### 4. Start the project at production mood (Terminal 1)
+
+```bash
+1. Open terminal for the project. 
+2. Run npm run build. 
+
+You should see:
+```
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+ ✓ Linting and checking validity of types 
+ ✓ Collecting page data    
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+ ✓ Generating static pages (7/7)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization    
+
+Route (app)                                 Size  First Load JS    
+┌ ○ /                                    3.45 kB         106 kB
+├ ○ /_not-found                            126 B         102 kB
+├ ○ /bookings                            5.43 kB         181 kB
+└ ○ /events                              5.96 kB         182 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/255-1aac5df21ceca329.js       46.1 kB
+  ├ chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB
+  └ other shared chunks (total)          1.99 kB
+
+
+○  (Static)  prerendered as static content
+
+PS C:\Users\pc\WEB_APPLICATIONS\ticket-booking-system\ticket-booking-system-frontend>
+
+
+3. If the build is successful run: 
+npm start
+
+You should see: 
+
+PS C:\Users\pc\WEB_APPLICATIONS\ticket-booking-system\ticket-booking-system-frontend> npm start
+
+> event-booking-system@0.1.0 start
+> next start
+
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.101:3000
+
+ ✓ Starting...
+ ✓ Ready in 818ms
+
+
+### 3. Flow Diagram
+
+```
+User submits booking with requestId
+         ↓
+Check if requestId exists in database
+         ↓
+    ┌────┴────┐
+    ↓         ↓
+  YES        NO
+    ↓         ↓
+Return      Create new
+existing    booking with
+booking     PENDING status
+            ↓
+          Add to queue
+            ↓
+          Return 202
+```
+
+---
+
+## 👥 Authors
+
+- **Shakidul Islam Shakil** - [GitHub Profile](https://github.com/ShakilJoy31)
+
+
+

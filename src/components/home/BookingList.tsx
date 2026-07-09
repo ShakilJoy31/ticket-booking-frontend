@@ -305,12 +305,12 @@ export default function BookingList() {
 
           {searchTerm && bookings.length > 0 && (
             <div className="mt-2 text-sm text-gray-400">
-              Found {pagination?.total || bookings.length} result(s) for "{searchTerm}"
+              Found {pagination?.total || bookings.length} result(s) for &quot;{searchTerm}&quot;
             </div>
           )}
           {searchTerm && bookings.length === 0 && !isLoading && (
             <div className="mt-2 text-sm text-yellow-500">
-              No results found for "{searchTerm}"
+              No results found for &quot;{searchTerm}&quot;
             </div>
           )}
         </div>
