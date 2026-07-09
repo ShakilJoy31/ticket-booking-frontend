@@ -21,7 +21,8 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery,
   tagTypes: [
-    "Certificate",
+    "Events",
+    "Booking",
   ],
   endpoints: () => ({}),
 });
