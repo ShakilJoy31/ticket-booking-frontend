@@ -28,8 +28,6 @@ import {
 } from 'lucide-react';
 import LanguageSwitcher from '../reusable-components/LanguageSwitcher';
 import { getUserInfo } from '@/utils/helper/userFromToken';
-import { useGetClientByIdQuery } from '@/redux/api/authentication/authApi';
-import FloatingButtons from './FloatingButtons';
 
 const navLinks = [
   {
@@ -105,9 +103,6 @@ export default function PublicNav() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { data: userData } = useGetClientByIdQuery(userId ? userId : '', {
-    skip: !userId
-  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -118,10 +113,6 @@ export default function PublicNav() {
     };
     fetchUser();
   }, [router]);
-
-  if (userData) {
-    router.push('/redirect?to=/admin/dashboard');
-  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -372,9 +363,6 @@ export default function PublicNav() {
           </div>
         )}
       </header>
-
-      {/* Floating Buttons - WhatsApp & Chatbot */}
-      <FloatingButtons />
     </>
   );
 }
