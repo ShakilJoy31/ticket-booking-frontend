@@ -21,6 +21,7 @@ import {
   Eye,
 } from "lucide-react";
 import { Booking, Event, useCreateBookingMutation, useGetAllBookingsQuery, useGetAllEventsQuery } from "@/redux/api/bookings/bookingApi";
+import BackButton from "../reusable-components/BackButton";
 
 export default function BookingList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +36,7 @@ export default function BookingList() {
     eventId: "",
     customerName: "",
     customerEmail: "",
-    seats: 1,
+    seats: 0,
   });
 
   // Queries
@@ -46,7 +47,7 @@ export default function BookingList() {
     status: selectedStatus || undefined,
   });
 
-  const { data: eventsData, isLoading: eventsLoading } = useGetAllEventsQuery();
+  const { data: eventsData, isLoading: eventsLoading, refetch: refetchEvents } = useGetAllEventsQuery();
 
   // Mutations
   const [createBooking, { isLoading: isCreating }] = useCreateBookingMutation();
@@ -83,7 +84,7 @@ export default function BookingList() {
       eventId: "",
       customerName: "",
       customerEmail: "",
-      seats: 1,
+      seats: 0,
     });
     setFormModalOpen(true);
   };
@@ -109,6 +110,10 @@ export default function BookingList() {
         toast.error("Seats must be at least 1");
         return;
       }
+       if (formData.seats > 10) {
+        toast.error("Seats must be at most 10");
+        return;
+      }
 
       await createBooking({
         requestId: formData.requestId,
@@ -120,11 +125,15 @@ export default function BookingList() {
 
       toast.success("Booking request accepted! Status will update shortly.");
       setFormModalOpen(false);
+      
+      // Refetch both bookings and events to update seat counts
       refetch();
+      refetchEvents();
 
-      // Refresh bookings after 3 seconds to show updated status
+      // Refresh again after 3 seconds to show updated status
       setTimeout(() => {
         refetch();
+        refetchEvents();
       }, 3000);
 
     } catch (error: any) {
@@ -176,6 +185,13 @@ export default function BookingList() {
     });
   };
 
+  // Get available seats for selected event
+  const getAvailableSeats = () => {
+    if (!formData.eventId) return null;
+    const event = events.find((e: Event) => e.id === parseInt(formData.eventId));
+    return event?.seatsRemaining || 0;
+  };
+
   if (isLoading && !bookings.length) {
     return (
       <div className="flex items-center justify-center min-h-[400px] bg-gray-950">
@@ -202,9 +218,13 @@ export default function BookingList() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Bookings Dashboard
-              </h1>
+              <div className="flex items-center gap-3">
+                <BackButton />
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Bookings Dashboard
+                </h1>
+              </div>
+
               <p className="text-gray-400 mt-2 flex items-center gap-2">
                 <span className="h-2 w-2 bg-blue-400 rounded-full animate-pulse"></span>
                 Manage and track all event bookings
@@ -212,7 +232,7 @@ export default function BookingList() {
             </div>
             <button
               onClick={handleAdd}
-              className="relative overflow-hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
+              className="relative cursor-pointer overflow-hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
             >
               <Plus className="w-5 h-5" />
               New Booking
@@ -407,7 +427,7 @@ export default function BookingList() {
           )}
         </div>
 
-        {/* Create Booking Modal */}
+        {/* Create Booking Modal - FIXED */}
         {formModalOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
@@ -434,7 +454,9 @@ export default function BookingList() {
                   </label>
                   <select
                     value={formData.eventId}
-                    onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, eventId: e.target.value });
+                    }}
                     className="w-full px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-800/50 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
                     disabled={eventsLoading}
                   >
@@ -445,9 +467,9 @@ export default function BookingList() {
                       </option>
                     ))}
                   </select>
-                  {formData.eventId && events.find((e: Event) => e.id === parseInt(formData.eventId)) && (
-                    <p className="mt-1 text-xs text-gray-400">
-                      Available seats: {events.find((e: Event) => e.id === parseInt(formData.eventId))?.seatsRemaining}
+                  {formData.eventId && (
+                    <p className="mt-1 text-xs text-green-400">
+                      ✅ Available seats: {getAvailableSeats()}
                     </p>
                   )}
                 </div>
@@ -495,14 +517,16 @@ export default function BookingList() {
                     <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                     <input
                       type="number"
-                      value={formData.seats}
+                      value={formData.seats === 0 ? "" : formData.seats}
                       onChange={(e) => setFormData({ ...formData, seats: parseInt(e.target.value) || 1 })}
                       min={1}
-                      max={10}
+                      max={getAvailableSeats() || 10}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-700 bg-gray-800/50 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
                     />
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">Maximum 10 seats per booking</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Maximum {Math.min(10, getAvailableSeats() || 10)} seats available
+                  </p>
                 </div>
 
                 {/* Request ID (auto-generated) */}
@@ -562,3 +586,4 @@ export default function BookingList() {
     </div>
   );
 }
+
