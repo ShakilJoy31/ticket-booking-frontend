@@ -39,12 +39,24 @@ export default function BookingList() {
     seats: 0,
   });
 
-  // Queries
+  // Handle search with debounce
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Queries - ✅ FIXED: Added search parameter
   const { data, isLoading, refetch } = useGetAllBookingsQuery({
     page: currentPage,
     limit: itemsPerPage,
     eventId: selectedEvent ? parseInt(selectedEvent) : undefined,
     status: selectedStatus || undefined,
+    search: debouncedSearchTerm || undefined,  // ✅ ADD THIS
   });
 
   const { data: eventsData, isLoading: eventsLoading, refetch: refetchEvents } = useGetAllEventsQuery();
@@ -63,17 +75,7 @@ export default function BookingList() {
     return `booking-${timestamp}-${random}`;
   };
 
-  // Handle search with debounce
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
+  // Refetch when filters change
   useEffect(() => {
     refetch();
   }, [debouncedSearchTerm, currentPage, selectedEvent, selectedStatus, refetch]);
@@ -586,4 +588,3 @@ export default function BookingList() {
     </div>
   );
 }
-
