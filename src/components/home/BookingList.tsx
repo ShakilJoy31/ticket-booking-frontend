@@ -563,7 +563,7 @@ export default function BookingList() {
                   Create Booking
                 </button>
               </div>
-            </div>
+            </div> 
           </div>
         )}
       </div>
